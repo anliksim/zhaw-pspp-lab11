@@ -74,5 +74,35 @@
 (pex (events-next-n-days 5 *events*))
 
 
+; swap-args
+(defun func1 (fun)
+  #'(lambda (a b) (funcall fun b a)))
+
+(defun f (a b) (+ (* a 2) b))
+
+(pex (funcall (func1 #'f) 2 5))
+; 12
+
+; invert
+(defun func2 (fun) 
+  #'(lambda (&rest args) (not (apply fun args))))
+
+(pex (funcall (func2 #'(lambda (li) (null li))) '(1 2 3)))
+; T
+(pex (funcall (func2 #'(lambda (li) (null li))) nil))
+; nil
+
+
+; pipeline
+(defun func3 (&rest funcs)
+  #'(lambda (&rest args) 
+      (car (reduce
+	     #'(lambda (ar f) (list (apply f ar)))
+	     funcs
+	     :initial-value args))))
+
+
+(pex (funcall (func3 #'f #'(lambda(n) (> n 3))) 1 1))
+; nil
 
 
